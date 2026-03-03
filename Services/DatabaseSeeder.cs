@@ -20,9 +20,8 @@ public class DatabaseSeeder
     public async Task SeedAsync()
     {
         var existingOrders = await _ordersCollection.CountDocumentsAsync(_ => true);
-        if (existingOrders > 0) return; // Zaten veri var, tekrar ekleme
+        if (existingOrders > 0) return;
 
-        // Platformları oluştur
         var platforms = new List<Platform>
         {
             new() { Name = "Trendyol" },
@@ -34,7 +33,6 @@ public class DatabaseSeeder
 
         await _platformsCollection.InsertManyAsync(platforms);
 
-        // Ürün havuzu
         var products = new[]
         {
             new { Name = "Kablosuz Kulaklık",     PurchaseMin = 120m, PurchaseMax = 250m,  SaleMin = 199m,  SaleMax = 449m,  Commission = 12m },
@@ -59,14 +57,14 @@ public class DatabaseSeeder
             new { Name = "LED Masa Lambası",      PurchaseMin = 80m,  PurchaseMax = 200m,  SaleMin = 139m,  SaleMax = 379m,  Commission = 12m },
         };
 
-        var random = new Random(42); // Sabit seed = tekrarlanabilir sonuçlar
+        var random = new Random(42);
         var orders = new List<Order>();
 
         for (int i = 0; i < 100; i++)
         {
             var platform = platforms[random.Next(platforms.Count)];
             var orderDate = DateTime.UtcNow.AddDays(-random.Next(1, 90));
-            var itemCount = random.Next(1, 4); // 1-3 ürün per sipariş
+            var itemCount = random.Next(1, 4);
 
             var items = new List<OrderItem>();
             for (int j = 0; j < itemCount; j++)
@@ -77,7 +75,6 @@ public class DatabaseSeeder
                 var quantity = random.Next(1, 6);
                 var shippingCost = Math.Round(5m + 30m * (decimal)random.NextDouble(), 2);
 
-                // %15 ihtimalle zarar eden ürün (düşük satış fiyatı)
                 if (random.NextDouble() < 0.15)
                 {
                     salePrice = Math.Round(purchasePrice * (0.6m + 0.35m * (decimal)random.NextDouble()), 2);

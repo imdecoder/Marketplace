@@ -1,6 +1,15 @@
 @Marketplace_HostAddress = http://localhost:5190
 
-### Create Sample Order 1
+### --- ORDERS ---
+
+### Get All Orders
+GET {{Marketplace_HostAddress}}/api/orders
+
+### Get Order by ID
+@orderId = 1
+GET {{Marketplace_HostAddress}}/api/orders/{{orderId}}
+
+### Create Sample Order
 POST {{Marketplace_HostAddress}}/api/orders
 Content-Type: application/json
 
@@ -27,24 +36,59 @@ Content-Type: application/json
   ]
 }
 
-### Create Sample Order 2
-POST {{Marketplace_HostAddress}}/api/orders
+### Update Order
+PUT {{Marketplace_HostAddress}}/api/orders/{{orderId}}
 Content-Type: application/json
 
 {
-  "platform": "Hepsiburada",
-  "date": "2026-03-04T12:00:00Z",
+  "platform": "Trendyol",
+  "date": "2026-03-03T10:00:00Z",
   "items": [
     {
-      "name": "Keyboard",
-      "purchasePrice": 500,
-      "salePrice": 1000,
-      "commissionRate": 8,
-      "shippingCost": 50,
-      "quantity": 1
+      "name": "Laptop Edited",
+      "purchasePrice": 10000,
+      "salePrice": 15500,
+      "commissionRate": 10,
+      "shippingCost": 100,
+      "quantity": 2
     }
   ]
 }
+
+### Delete Order
+DELETE {{Marketplace_HostAddress}}/api/orders/{{orderId}}
+
+
+### --- PLATFORMS ---
+
+### Get All Platforms
+GET {{Marketplace_HostAddress}}/api/platforms
+
+### Get Platform by ID
+@platformId = 1
+GET {{Marketplace_HostAddress}}/api/platforms/{{platformId}}
+
+### Create Sample Platform
+POST {{Marketplace_HostAddress}}/api/platforms
+Content-Type: application/json
+
+{
+    "name": "Trendyol"
+}
+
+### Update Platform
+PUT {{Marketplace_HostAddress}}/api/platforms/{{platformId}}
+Content-Type: application/json
+
+{
+    "name": "Trendyol Edited"
+}
+
+### Delete Platform
+DELETE {{Marketplace_HostAddress}}/api/platforms/{{platformId}}
+
+
+### --- REPORTS ---
 
 ### Get Summary Report
 GET {{Marketplace_HostAddress}}/api/report/summary

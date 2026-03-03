@@ -41,9 +41,9 @@ public class OrderAnalysisService
     {
         var orders = await _ordersCollection.Find(_ => true).ToListAsync();
         var totalOrders = orders.Count;
-        var totalProductCount = orders.Sum(o => o.Items.Sum(i => i.Quantity));
-        var totalTurnover = orders.Sum(o => o.Items.Sum(i => i.SalePrice * i.Quantity));
-        var totalNetProfit = orders.Sum(o => o.Items.Sum(i => CalculateNetProfit(i)));
+        var totalProductCount = orders.SelectMany(o => o.Items).Sum(i => i.Quantity);
+        var totalTurnover = orders.SelectMany(o => o.Items).Sum(i => i.SalePrice * i.Quantity);
+        var totalNetProfit = orders.SelectMany(o => o.Items).Sum(i => CalculateNetProfit(i));
 
         return new { totalOrders, totalProductCount, totalTurnover, totalNetProfit };
     }
@@ -57,10 +57,10 @@ public class OrderAnalysisService
         var platformStats = orders.GroupBy(o => o.PlatformId)
             .Select(g =>
             {
-                var turnover = g.Sum(o => o.Items.Sum(i => i.SalePrice * i.Quantity));
-                var netProfit = g.Sum(o => o.Items.Sum(i => CalculateNetProfit(i)));
+                var turnover = g.SelectMany(o => o.Items).Sum(i => i.SalePrice * i.Quantity);
+                var netProfit = g.SelectMany(o => o.Items).Sum(i => CalculateNetProfit(i));
                 var profitMargin = turnover > 0 ? (netProfit / turnover) * 100 : 0;
-                var platformName = platformDict.ContainsKey(g.Key) ? platformDict[g.Key] : "Unknown";
+                var platformName = platformDict.TryGetValue(g.Key, out var name) ? name : "Unknown";
                 return new
                 {
                     platform = platformName,
@@ -83,7 +83,7 @@ public class OrderAnalysisService
         var lossProducts = orders.SelectMany(o => o.Items.Select(i => new
         {
             orderId = o.Id,
-            platform = platformDict.ContainsKey(o.PlatformId) ? platformDict[o.PlatformId] : "Unknown",
+            platform = platformDict.TryGetValue(o.PlatformId, out var name) ? name : "Unknown",
             platformId = o.PlatformId,
             date = o.Date,
             item = i,
@@ -108,7 +108,7 @@ public class OrderAnalysisService
         var anomalies = orders.SelectMany(o => o.Items.Select(i => new
         {
             orderId = o.Id,
-            platform = platformDict.ContainsKey(o.PlatformId) ? platformDict[o.PlatformId] : "Unknown",
+            platform = platformDict.TryGetValue(o.PlatformId, out var name) ? name : "Unknown",
             platformId = o.PlatformId,
             date = o.Date,
             item = i,
@@ -130,8 +130,8 @@ public class OrderAnalysisService
             .Select(g => new
             {
                 date = g.Key.ToString("yyyy-MM-dd"),
-                dailyTurnover = g.Sum(o => o.Items.Sum(i => i.SalePrice * i.Quantity)),
-                dailyNetProfit = g.Sum(o => o.Items.Sum(i => CalculateNetProfit(i)))
+                dailyTurnover = g.SelectMany(o => o.Items).Sum(i => i.SalePrice * i.Quantity),
+                dailyNetProfit = g.SelectMany(o => o.Items).Sum(i => CalculateNetProfit(i))
             }).ToList();
 
         return dailyStats;
@@ -156,7 +156,7 @@ public class OrderAnalysisService
             return new
             {
                 orderId = o.Id,
-                platform = platformDict.ContainsKey(o.PlatformId) ? platformDict[o.PlatformId] : "Unknown",
+                platform = platformDict.TryGetValue(o.PlatformId, out var name) ? name : "Unknown",
                 platformId = o.PlatformId,
                 item = i,
                 profitMargin = Math.Round(profitMargin, 2),
