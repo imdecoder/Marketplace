@@ -21,9 +21,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
     app.UseSwagger();
-    app.UseSwaggerUI();
-
-    app.MapGet("/", () => Results.Redirect("/swagger"));
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Marketplace API v1");
+        options.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseHttpsRedirection();
