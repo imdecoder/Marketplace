@@ -3,6 +3,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+// Configure MongoDB
+builder.Services.Configure<Marketplace.Models.DatabaseSettings>(
+    builder.Configuration.GetSection("DatabaseSettings"));
+
+builder.Services.AddSingleton<Marketplace.Services.OrderAnalysisService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

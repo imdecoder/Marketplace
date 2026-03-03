@@ -1,6 +1,65 @@
 @Marketplace_HostAddress = http://localhost:5190
 
-GET {{Marketplace_HostAddress}}/weatherforecast/
-Accept: application/json
+### Create Sample Order 1
+POST {{Marketplace_HostAddress}}/api/orders
+Content-Type: application/json
 
-###
+{
+  "platform": "Trendyol",
+  "date": "2026-03-03T10:00:00Z",
+  "items": [
+    {
+      "name": "Laptop",
+      "purchasePrice": 10000,
+      "salePrice": 15000,
+      "commissionRate": 10,
+      "shippingCost": 100,
+      "quantity": 2
+    },
+    {
+      "name": "Mouse",
+      "purchasePrice": 200,
+      "salePrice": 150,
+      "commissionRate": 5,
+      "shippingCost": 20,
+      "quantity": 5
+    }
+  ]
+}
+
+### Create Sample Order 2
+POST {{Marketplace_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "platform": "Hepsiburada",
+  "date": "2026-03-04T12:00:00Z",
+  "items": [
+    {
+      "name": "Keyboard",
+      "purchasePrice": 500,
+      "salePrice": 1000,
+      "commissionRate": 8,
+      "shippingCost": 50,
+      "quantity": 1
+    }
+  ]
+}
+
+### Get Summary Report
+GET {{Marketplace_HostAddress}}/api/report/summary
+
+### Get Platform Report
+GET {{Marketplace_HostAddress}}/api/report/platform
+
+### Get Loss Report
+GET {{Marketplace_HostAddress}}/api/report/loss
+
+### Get Anomaly Report
+GET {{Marketplace_HostAddress}}/api/report/anomaly
+
+### Get Trend Report
+GET {{Marketplace_HostAddress}}/api/report/trend
+
+### Get Risk Report
+GET {{Marketplace_HostAddress}}/api/report/risk
