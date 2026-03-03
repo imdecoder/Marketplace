@@ -37,9 +37,23 @@ public class OrderAnalysisService
         return (item.SalePrice - item.PurchasePrice - (item.SalePrice * item.CommissionRate / 100) - item.ShippingCost) * item.Quantity;
     }
 
-    public async Task<object> GetSummaryAsync()
+    private async Task<List<Order>> GetFilteredOrdersAsync(DateTime? startDate, DateTime? endDate)
     {
-        var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var filterBuilder = Builders<Order>.Filter;
+        var filter = filterBuilder.Empty;
+
+        if (startDate.HasValue)
+            filter &= filterBuilder.Gte(o => o.Date, startDate.Value);
+
+        if (endDate.HasValue)
+            filter &= filterBuilder.Lte(o => o.Date, endDate.Value);
+
+        return await _ordersCollection.Find(filter).ToListAsync();
+    }
+
+    public async Task<object> GetSummaryAsync(DateTime? startDate = null, DateTime? endDate = null)
+    {
+        var orders = await GetFilteredOrdersAsync(startDate, endDate);
         var totalOrders = orders.Count;
         var totalProductCount = orders.SelectMany(o => o.Items).Sum(i => i.Quantity);
         var totalTurnover = orders.SelectMany(o => o.Items).Sum(i => i.SalePrice * i.Quantity);
@@ -48,9 +62,9 @@ public class OrderAnalysisService
         return new { totalOrders, totalProductCount, totalTurnover, totalNetProfit };
     }
 
-    public async Task<object> GetPlatformReportAsync()
+    public async Task<object> GetPlatformReportAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
-        var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var orders = await GetFilteredOrdersAsync(startDate, endDate);
         var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
         var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
 
@@ -74,9 +88,9 @@ public class OrderAnalysisService
         return platformStats;
     }
 
-    public async Task<object> GetLossReportAsync()
+    public async Task<object> GetLossReportAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
-        var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var orders = await GetFilteredOrdersAsync(startDate, endDate);
         var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
         var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
 
@@ -95,9 +109,9 @@ public class OrderAnalysisService
         return lossProducts;
     }
 
-    public async Task<object> GetAnomalyReportAsync()
+    public async Task<object> GetAnomalyReportAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
-        var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var orders = await GetFilteredOrdersAsync(startDate, endDate);
         var allItems = orders.SelectMany(o => o.Items).ToList();
         var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
         var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
@@ -121,9 +135,9 @@ public class OrderAnalysisService
         return anomalies;
     }
 
-    public async Task<object> GetTrendReportAsync()
+    public async Task<object> GetTrendReportAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
-        var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var orders = await GetFilteredOrdersAsync(startDate, endDate);
 
         var dailyStats = orders.GroupBy(o => o.Date.Date)
             .OrderBy(g => g.Key)
@@ -137,9 +151,9 @@ public class OrderAnalysisService
         return dailyStats;
     }
 
-    public async Task<object> GetRiskReportAsync()
+    public async Task<object> GetRiskReportAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
-        var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var orders = await GetFilteredOrdersAsync(startDate, endDate);
         var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
         var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
 
