@@ -7,12 +7,14 @@ namespace Marketplace.Services;
 public class OrderAnalysisService
 {
     private readonly IMongoCollection<Order> _ordersCollection;
+    private readonly IMongoCollection<Platform> _platformsCollection;
 
     public OrderAnalysisService(IOptions<DatabaseSettings> databaseSettings)
     {
         var mongoClient = new MongoClient(databaseSettings.Value.ConnectionString);
         var mongoDatabase = mongoClient.GetDatabase(databaseSettings.Value.DatabaseName);
         _ordersCollection = mongoDatabase.GetCollection<Order>(databaseSettings.Value.OrdersCollectionName);
+        _platformsCollection = mongoDatabase.GetCollection<Platform>(databaseSettings.Value.PlatformsCollectionName);
     }
 
     public async Task CreateOrderAsync(Order newOrder)
@@ -39,16 +41,20 @@ public class OrderAnalysisService
     public async Task<object> GetPlatformReportAsync()
     {
         var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
+        var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
 
-        var platformStats = orders.GroupBy(o => o.Platform)
+        var platformStats = orders.GroupBy(o => o.PlatformId)
             .Select(g =>
             {
                 var turnover = g.Sum(o => o.Items.Sum(i => i.SalePrice * i.Quantity));
                 var netProfit = g.Sum(o => o.Items.Sum(i => CalculateNetProfit(i)));
                 var profitMargin = turnover > 0 ? (netProfit / turnover) * 100 : 0;
+                var platformName = platformDict.ContainsKey(g.Key) ? platformDict[g.Key] : "Unknown";
                 return new
                 {
-                    platform = g.Key,
+                    platform = platformName,
+                    platformId = g.Key,
                     turnover,
                     netProfit,
                     profitMargin = Math.Round(profitMargin, 2)
@@ -61,11 +67,14 @@ public class OrderAnalysisService
     public async Task<object> GetLossReportAsync()
     {
         var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
+        var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
 
         var lossProducts = orders.SelectMany(o => o.Items.Select(i => new
         {
             orderId = o.Id,
-            platform = o.Platform,
+            platform = platformDict.ContainsKey(o.PlatformId) ? platformDict[o.PlatformId] : "Unknown",
+            platformId = o.PlatformId,
             date = o.Date,
             item = i,
             netProfit = CalculateNetProfit(i)
@@ -80,6 +89,8 @@ public class OrderAnalysisService
     {
         var orders = await _ordersCollection.Find(_ => true).ToListAsync();
         var allItems = orders.SelectMany(o => o.Items).ToList();
+        var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
+        var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
 
         var averagePrices = allItems.GroupBy(i => i.Name)
             .ToDictionary(g => g.Key, g => g.Average(i => i.SalePrice));
@@ -87,7 +98,8 @@ public class OrderAnalysisService
         var anomalies = orders.SelectMany(o => o.Items.Select(i => new
         {
             orderId = o.Id,
-            platform = o.Platform,
+            platform = platformDict.ContainsKey(o.PlatformId) ? platformDict[o.PlatformId] : "Unknown",
+            platformId = o.PlatformId,
             date = o.Date,
             item = i,
             averagePrice = averagePrices[i.Name],
@@ -118,6 +130,8 @@ public class OrderAnalysisService
     public async Task<object> GetRiskReportAsync()
     {
         var orders = await _ordersCollection.Find(_ => true).ToListAsync();
+        var platforms = await _platformsCollection.Find(_ => true).ToListAsync();
+        var platformDict = platforms.ToDictionary(p => p.Id!, p => p.Name);
 
         var riskLevels = orders.SelectMany(o => o.Items.Select(i =>
         {
@@ -132,7 +146,8 @@ public class OrderAnalysisService
             return new
             {
                 orderId = o.Id,
-                platform = o.Platform,
+                platform = platformDict.ContainsKey(o.PlatformId) ? platformDict[o.PlatformId] : "Unknown",
+                platformId = o.PlatformId,
                 item = i,
                 profitMargin = Math.Round(profitMargin, 2),
                 riskLevel

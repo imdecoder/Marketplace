@@ -9,6 +9,7 @@ builder.Services.Configure<Marketplace.Models.DatabaseSettings>(
     builder.Configuration.GetSection("DatabaseSettings"));
 
 builder.Services.AddSingleton<Marketplace.Services.OrderAnalysisService>();
+builder.Services.AddSingleton<Marketplace.Services.DatabaseSeeder>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -34,6 +35,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/", () => Results.Redirect("/swagger"));
+// Seed database with initial data if empty
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<Marketplace.Services.DatabaseSeeder>();
+    await seeder.SeedAsync();
+}
 
 app.Run();

@@ -11,8 +11,9 @@ public class Order
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Id { get; set; }
 
-    [JsonPropertyName("platform")]
-    public string Platform { get; set; } = null!;
+    [BsonRepresentation(BsonType.ObjectId)]
+    [JsonPropertyName("platformId")]
+    public string PlatformId { get; set; } = null!;
 
     [JsonPropertyName("date")]
     public DateTime Date { get; set; }
