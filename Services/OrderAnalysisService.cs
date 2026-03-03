@@ -20,7 +20,7 @@ public class OrderAnalysisService
         await _ordersCollection.InsertOneAsync(newOrder);
     }
 
-    private decimal CalculateNetProfit(OrderItem item)
+    private static decimal CalculateNetProfit(OrderItem item)
     {
         return (item.SalePrice - item.PurchasePrice - (item.SalePrice * item.CommissionRate / 100) - item.ShippingCost) * item.Quantity;
     }
@@ -49,8 +49,8 @@ public class OrderAnalysisService
                 return new
                 {
                     platform = g.Key,
-                    turnover = turnover,
-                    netProfit = netProfit,
+                    turnover,
+                    netProfit,
                     profitMargin = Math.Round(profitMargin, 2)
                 };
             }).ToList();
@@ -135,7 +135,7 @@ public class OrderAnalysisService
                 platform = o.Platform,
                 item = i,
                 profitMargin = Math.Round(profitMargin, 2),
-                riskLevel = riskLevel
+                riskLevel
             };
         }))
         .ToList();

@@ -6,21 +6,13 @@ namespace Marketplace.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class OrdersController : ControllerBase
+public class OrdersController(OrderAnalysisService orderAnalysisService) : ControllerBase
 {
-    private readonly OrderAnalysisService _orderAnalysisService;
-
-    public OrdersController(OrderAnalysisService orderAnalysisService)
-    {
-        _orderAnalysisService = orderAnalysisService;
-    }
-
     [HttpPost]
     public async Task<IActionResult> Post(Order newOrder)
     {
-        // Force Id to null so MongoDB auto-generates a new ObjectId instead of trying to parse a client-provided dummy value (like Swagger's "string")
         newOrder.Id = null;
-        await _orderAnalysisService.CreateOrderAsync(newOrder);
+        await orderAnalysisService.CreateOrderAsync(newOrder);
 
         return CreatedAtAction(nameof(Post), new { id = newOrder.Id }, newOrder);
     }
