@@ -9,6 +9,7 @@ builder.Services.Configure<Marketplace.Models.DatabaseSettings>(
     builder.Configuration.GetSection("DatabaseSettings"));
 
 builder.Services.AddSingleton<Marketplace.Services.OrderAnalysisService>();
+builder.Services.AddSingleton<Marketplace.Services.PlatformService>();
 builder.Services.AddSingleton<Marketplace.Services.DatabaseSeeder>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

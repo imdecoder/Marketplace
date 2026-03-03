@@ -17,10 +17,20 @@ public class OrderAnalysisService
         _platformsCollection = mongoDatabase.GetCollection<Platform>(databaseSettings.Value.PlatformsCollectionName);
     }
 
-    public async Task CreateOrderAsync(Order newOrder)
-    {
+    public async Task<List<Order>> GetAllOrdersAsync() =>
+        await _ordersCollection.Find(_ => true).ToListAsync();
+
+    public async Task<Order?> GetOrderByIdAsync(string id) =>
+        await _ordersCollection.Find(o => o.Id == id).FirstOrDefaultAsync();
+
+    public async Task CreateOrderAsync(Order newOrder) =>
         await _ordersCollection.InsertOneAsync(newOrder);
-    }
+
+    public async Task UpdateOrderAsync(string id, Order updatedOrder) =>
+        await _ordersCollection.ReplaceOneAsync(o => o.Id == id, updatedOrder);
+
+    public async Task DeleteOrderAsync(string id) =>
+        await _ordersCollection.DeleteOneAsync(o => o.Id == id);
 
     private static decimal CalculateNetProfit(OrderItem item)
     {
