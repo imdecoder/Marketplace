@@ -39,10 +39,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<Marketplace.Services.DatabaseSeeder>();
-    await seeder.SeedAsync();
+    using (var scope = app.Services.CreateScope())
+    {
+        var seeder = scope.ServiceProvider.GetRequiredService<Marketplace.Services.DatabaseSeeder>();
+        await seeder.SeedAsync();
+    }
 }
 
 app.Run();
