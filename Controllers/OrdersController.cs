@@ -60,7 +60,7 @@ public class OrdersController(OrderAnalysisService orderAnalysisService) : Contr
     ///             "name": "Örnek Ürün",
     ///             "purchasePrice": 100.0,
     ///             "salePrice": 150.0,
-    ///             "commissionRate": 0.15,
+    ///             "commissionRate": 12,
     ///             "shippingCost": 10.0,
     ///             "quantity": 2
     ///           }
@@ -94,7 +94,7 @@ public class OrdersController(OrderAnalysisService orderAnalysisService) : Contr
     ///             "name": "Güncellenmiş Ürün",
     ///             "purchasePrice": 120.0,
     ///             "salePrice": 200.0,
-    ///             "commissionRate": 0.15,
+    ///             "commissionRate": 12,
     ///             "shippingCost": 15.0,
     ///             "quantity": 1
     ///           }
