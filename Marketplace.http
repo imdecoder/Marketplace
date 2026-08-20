@@ -6,15 +6,20 @@
 GET {{Marketplace_HostAddress}}/api/orders
 
 ### Get Order by ID
-@orderId = 1
+# Run "Get All Orders" above first, then copy an id from the response into @orderId.
+@orderId = 507f1f77bcf86cd799439011
 GET {{Marketplace_HostAddress}}/api/orders/{{orderId}}
 
+### Known limitation: non-ObjectId values currently return 500 instead of 404
+GET {{Marketplace_HostAddress}}/api/orders/1
+
 ### Create Sample Order
+# platformId must be an existing 24-character ObjectId - copy one from "Get All Platforms" below.
 POST {{Marketplace_HostAddress}}/api/orders
 Content-Type: application/json
 
 {
-  "platform": "Trendyol",
+  "platformId": "507f1f77bcf86cd799439011",
   "date": "2026-03-03T10:00:00Z",
   "items": [
     {
@@ -41,7 +46,7 @@ PUT {{Marketplace_HostAddress}}/api/orders/{{orderId}}
 Content-Type: application/json
 
 {
-  "platform": "Trendyol",
+  "platformId": "507f1f77bcf86cd799439011",
   "date": "2026-03-03T10:00:00Z",
   "items": [
     {
@@ -65,7 +70,8 @@ DELETE {{Marketplace_HostAddress}}/api/orders/{{orderId}}
 GET {{Marketplace_HostAddress}}/api/platforms
 
 ### Get Platform by ID
-@platformId = 1
+# Run "Get All Platforms" above first, then copy an id from the response into @platformId.
+@platformId = 507f1f77bcf86cd799439011
 GET {{Marketplace_HostAddress}}/api/platforms/{{platformId}}
 
 ### Create Sample Platform
